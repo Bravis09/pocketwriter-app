@@ -7,6 +7,8 @@ import ArticleDetail from './src/screens/ArticleDetail';
 import TemplateBuilder from './src/screens/TemplateBuilder';
 import ArticleEditor from './src/screens/ArticleEditor';
 
+
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {

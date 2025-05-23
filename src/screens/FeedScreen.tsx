@@ -1,7 +1,9 @@
 import axios from 'axios';
 import { Article } from '../types/Article';
+
+
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, ActivityIndicator, Button } from 'react-native';
 import api from '../services/api';
 
 export default function FeedScreen({ navigation }: any) {
@@ -23,6 +25,7 @@ useEffect(() => {
   fetchArticles();
 }, []);
 
+
   const renderItem = ({ item }: any) => (
     <TouchableOpacity
       onPress={() => navigation.navigate('ArticleDetail', { id: item.id })}
@@ -37,12 +40,20 @@ useEffect(() => {
   if (loading) return <ActivityIndicator size="large" style={{ flex: 1 }} />;
 
   return (
-    <FlatList
-      data={articles}
-      renderItem={renderItem}
-      keyExtractor={(item) => item.id.toString()}
-      contentContainerStyle={{ padding: 10 }}
-    />
+    <View style={{ flex: 1 }}>
+      <FlatList
+        data={articles}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={{ padding: 10 }}
+      />
+      <View style={{ padding: 10 }}>
+        <Button
+          title="Go to Template Builder"
+          onPress={() => navigation.navigate('TemplateBuilder')}
+        />
+      </View>
+    </View>
   );
 }
 
