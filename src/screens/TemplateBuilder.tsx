@@ -1,5 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Image, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
+import DraggableFlatList, {
+  RenderItemParams,
+} from 'react-native-draggable-flatlist';
 
 type Block = {
   id: string;
@@ -17,26 +28,45 @@ export default function TemplateBuilder() {
     setTextInput('');
   };
 
-  const addImageBlock = () => {
-    const dummyImage = 'https://via.placeholder.com/300'; // Replace with image picker later
-    setBlocks([...blocks, { id: Date.now().toString(), type: 'image', content: dummyImage }]);
+ const addImageBlock = () => {
+  const dummyImage = 'https://source.unsplash.com/random/600x400?sig=' + Date.now();
+  const newBlock: Block = {
+    id: Date.now().toString(),
+    type: 'image',
+    content: dummyImage,
   };
+  console.log('Adding image block:', newBlock);
+  setBlocks([...blocks, newBlock]);
+};
+
+
+  const renderItem = ({ item, drag, isActive }: RenderItemParams<Block>) => (
+    <TouchableOpacity
+      onLongPress={drag}
+      disabled={isActive}
+      style={[
+        styles.block,
+        { opacity: isActive ? 0.7 : 1, backgroundColor: '#fff' },
+      ]}
+    >
+      {item.type === 'text' ? (
+        <Text style={styles.textBlock}>{item.content}</Text>
+      ) : (
+        <Image source={{ uri: item.content }} style={styles.imageBlock} />
+      )}
+    </TouchableOpacity>
+  );
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Template Builder</Text>
 
-      <ScrollView style={styles.blockList}>
-        {blocks.map((block) => (
-          <View key={block.id} style={styles.block}>
-            {block.type === 'text' ? (
-              <Text style={styles.textBlock}>{block.content}</Text>
-            ) : (
-              <Image source={{ uri: block.content }} style={styles.imageBlock} />
-            )}
-          </View>
-        ))}
-      </ScrollView>
+      <DraggableFlatList
+        data={blocks}
+        onDragEnd={({ data }) => setBlocks(data)}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+      />
 
       <View style={styles.controls}>
         <TextInput
@@ -55,10 +85,16 @@ export default function TemplateBuilder() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: '#fff' },
   title: { fontSize: 20, fontWeight: 'bold', marginBottom: 10 },
-  blockList: { flex: 1, marginBottom: 20 },
-  block: { marginBottom: 12 },
-  textBlock: { fontSize: 16, padding: 10, backgroundColor: '#f0f0f0', borderRadius: 6 },
-  imageBlock: { width: '100%', height: 200, borderRadius: 6 },
+  block: {
+    padding: 10,
+    borderRadius: 6,
+    marginBottom: 10,
+    elevation: 1,
+    shadowColor: '#000',
+    backgroundColor: '#f8f8f8',
+  },
+  textBlock: { fontSize: 16 },
+  imageBlock: { width: '100%', height: 200, borderRadius: 6, borderWidth:2, borderColor:'red', },
   controls: { gap: 10 },
   input: {
     borderColor: '#ccc',
