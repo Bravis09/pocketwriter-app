@@ -1,3 +1,4 @@
+import api from '../services/api'; // make sure this is at the top of the file
 import React, { useState } from 'react';
 import {
   View,
@@ -21,6 +22,8 @@ type Block = {
 export default function TemplateBuilder() {
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [textInput, setTextInput] = useState('');
+  const [templateName, setTemplateName] = useState('');
+
 
   const addTextBlock = () => {
     if (!textInput.trim()) return;
@@ -29,7 +32,7 @@ export default function TemplateBuilder() {
   };
 
  const addImageBlock = () => {
-  const dummyImage = 'https://source.unsplash.com/random/600x400?sig=' + Date.now();
+  const dummyImage = 'https://image-processor-storage.s3.us-west-2.amazonaws.com/images/281c2d4581ed27c8a258b0e79bc504ad/halo-of-neon-ring-illuminated-in-the-stunning-landscape-of-yosemite.jpg';
   const newBlock: Block = {
     id: Date.now().toString(),
     type: 'image',
@@ -37,6 +40,26 @@ export default function TemplateBuilder() {
   };
   console.log('Adding image block:', newBlock);
   setBlocks([...blocks, newBlock]);
+};
+
+const handleSaveTemplate = async () => {
+  if (!templateName.trim()) {
+    alert('Please enter a template name');
+    return;
+  }
+
+  try {
+    const response = await api.post('/templates', {
+      name: templateName,
+      layout: blocks,
+    });
+
+    alert('Template saved successfully!');
+    setTemplateName('');
+  } catch (error) {
+    console.error('Error saving template:', error);
+    alert('Failed to save template');
+  }
 };
 
 
@@ -52,7 +75,9 @@ export default function TemplateBuilder() {
       {item.type === 'text' ? (
         <Text style={styles.textBlock}>{item.content}</Text>
       ) : (
-        <Image source={{ uri: item.content }} style={styles.imageBlock} />
+    
+  <Image source={{ uri: item.content }} style={styles.imageBlock} />
+
       )}
     </TouchableOpacity>
   );
@@ -77,6 +102,14 @@ export default function TemplateBuilder() {
         />
         <Button title="Add Text" onPress={addTextBlock} />
         <Button title="Add Image" onPress={addImageBlock} />
+        <TextInput
+           placeholder="Template Name"
+           value={templateName}
+           onChangeText={setTemplateName}
+           style={styles.input}
+        />
+        <Button title="Save Template" onPress={handleSaveTemplate} />
+
       </View>
     </View>
   );
@@ -94,7 +127,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f8f8',
   },
   textBlock: { fontSize: 16 },
-  imageBlock: { width: '100%', height: 200, borderRadius: 6, borderWidth:2, borderColor:'red', },
+  imageBlock: { width: '50%', height: 300, borderRadius: 6, borderWidth:2, borderColor:'red', },
   controls: { gap: 10 },
   input: {
     borderColor: '#ccc',
